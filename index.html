@@ -60,17 +60,21 @@ body{
   background:#0f2235;
   border-radius:18px;
   padding:24px;
+  overflow-y:auto;
 }
 
 .teams-box{
+  grid-column:2;
   grid-row:1 / 3;
 }
 
 .current-box{
+  grid-column:1;
   grid-row:1 / 2;
 }
 
 .events-box{
+  grid-column:1;
   grid-row:2 / 3;
 }
 
@@ -134,12 +138,6 @@ body{
 
 <div class="container">
 
-  <!-- TEAM RANKINGS -->
-  <div class="box teams-box">
-    <h2>Team Rankings</h2>
-    <div id="teams"></div>
-  </div>
-
   <!-- CURRENT PERIOD -->
   <div class="box current-box current">
     <h2 id="currentPeriod">No Active Period</h2>
@@ -152,6 +150,12 @@ body{
   <div class="box events-box">
     <h2>This Week</h2>
     <div id="events"></div>
+  </div>
+
+  <!-- TEAM RANKINGS -->
+  <div class="box teams-box">
+    <h2>Team Rankings</h2>
+    <div id="teams"></div>
   </div>
 
 </div>
