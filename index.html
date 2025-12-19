@@ -49,7 +49,7 @@ body{
 /* LAYOUT */
 .container{
   display:grid;
-  grid-template-columns:2fr 1fr;
+  grid-template-columns:1fr 1fr;
   grid-template-rows:1fr 1fr;
   gap:18px;
   padding:18px;
@@ -60,6 +60,18 @@ body{
   background:#0f2235;
   border-radius:18px;
   padding:24px;
+}
+
+.teams-box{
+  grid-row:1 / 3;
+}
+
+.current-box{
+  grid-row:1 / 2;
+}
+
+.events-box{
+  grid-row:2 / 3;
 }
 
 /* CURRENT PERIOD */
@@ -106,72 +118,6 @@ body{
   color:var(--yellow);
   text-align:center;
 }
-
-/* ADMIN PANEL */
-.admin-btn{
-  position:fixed;
-  bottom:20px;
-  right:20px;
-  width:60px;
-  height:60px;
-  border-radius:50%;
-  background:var(--yellow);
-  border:none;
-  font-size:28px;
-  cursor:pointer;
-  z-index:998;
-  box-shadow:0 4px 12px rgba(0,0,0,.4);
-}
-.admin-panel{
-  position:fixed;
-  right:-400px;
-  top:0;
-  width:380px;
-  height:100vh;
-  background:#0b1c2b;
-  padding:30px;
-  box-shadow:-4px 0 20px rgba(0,0,0,.5);
-  transition:right 0.3s;
-  z-index:999;
-  overflow-y:auto;
-}
-.admin-panel.open{right:0;}
-.admin-panel h2{margin-top:0;color:var(--yellow);}
-.admin-section{margin-bottom:30px;}
-.admin-section h3{color:var(--red);margin-bottom:12px;}
-.admin-btn-group button{
-  width:100%;
-  padding:14px;
-  margin-bottom:10px;
-  border:2px solid var(--red);
-  background:#071521;
-  color:white;
-  font-size:16px;
-  border-radius:8px;
-  cursor:pointer;
-  transition:all 0.2s;
-}
-.admin-btn-group button:hover{background:var(--red);}
-.admin-btn-group button.active{background:var(--red);border-color:var(--yellow);}
-.close-admin{
-  position:absolute;
-  top:20px;
-  right:20px;
-  background:none;
-  border:none;
-  color:white;
-  font-size:32px;
-  cursor:pointer;
-}
-.status-badge{
-  display:inline-block;
-  padding:6px 12px;
-  border-radius:6px;
-  font-size:14px;
-  margin-top:8px;
-}
-.status-normal{background:#0f2235;color:#4ade80;}
-.status-override{background:var(--red);color:white;}
 </style>
 </head>
 
@@ -188,22 +134,22 @@ body{
 
 <div class="container">
 
+  <!-- TEAM RANKINGS -->
+  <div class="box teams-box">
+    <h2>Team Rankings</h2>
+    <div id="teams"></div>
+  </div>
+
   <!-- CURRENT PERIOD -->
-  <div class="box current">
+  <div class="box current-box current">
     <h2 id="currentPeriod">No Active Period</h2>
     <div class="countdown" id="countdown">--:--</div>
     <h3 style="margin-top:16px;">Up Next</h3>
     <div class="upcoming" id="upcoming"></div>
   </div>
 
-  <!-- TEAM RANKINGS -->
-  <div class="box">
-    <h2>Team Rankings</h2>
-    <div id="teams"></div>
-  </div>
-
   <!-- EVENTS -->
-  <div class="box">
+  <div class="box events-box">
     <h2>This Week</h2>
     <div id="events"></div>
   </div>
@@ -221,103 +167,13 @@ body{
   </div>
 </div>
 
-<button class="admin-btn" onclick="toggleAdmin()">⚙️</button>
-
-<div class="admin-panel" id="adminPanel">
-  <button class="close-admin" onclick="toggleAdmin()">×</button>
-  <h2>Admin Controls</h2>
-  
-  <div class="admin-section">
-    <h3>Schedule Override</h3>
-    <div class="admin-btn-group">
-      <button onclick="setSchedule('normal')" id="btn-normal">Normal Schedule</button>
-      <button onclick="setSchedule('testing')" id="btn-testing">Testing Schedule</button>
-      <button onclick="setSchedule('halfday')" id="btn-halfday">Half Day</button>
-    </div>
-    <div class="status-badge" id="scheduleStatus">Normal Schedule</div>
-  </div>
-
-  <div class="admin-section">
-    <h3>Emergency Controls</h3>
-    <div class="admin-btn-group">
-      <button onclick="toggleEmergency()" id="btn-emergency" style="border-color:var(--red);font-weight:bold;">
-        🚨 Toggle Emergency Closure
-      </button>
-    </div>
-    <div class="status-badge status-normal" id="emergencyStatus">School Open</div>
-  </div>
-
-  <div class="admin-section">
-    <h3>Quick Actions</h3>
-    <div class="admin-btn-group">
-      <button onclick="resetAll()">Reset All Overrides</button>
-    </div>
-  </div>
-</div>
-
 <script>
-/* =========================
-   ADMIN CONTROLS
-========================= */
-let scheduleOverride = localStorage.getItem('scheduleOverride') || 'normal';
-let emergencyClosure = localStorage.getItem('emergencyClosure') === 'true';
-
-function toggleAdmin(){
-  document.getElementById('adminPanel').classList.toggle('open');
-  updateAdminUI();
-}
-
-function setSchedule(type){
-  scheduleOverride = type;
-  localStorage.setItem('scheduleOverride', type);
-  updateAdminUI();
-  updateSchedule();
-}
-
-function toggleEmergency(){
-  emergencyClosure = !emergencyClosure;
-  localStorage.setItem('emergencyClosure', emergencyClosure);
-  updateAdminUI();
-  updateSchedule();
-}
-
-function resetAll(){
-  scheduleOverride = 'normal';
-  emergencyClosure = false;
-  localStorage.removeItem('scheduleOverride');
-  localStorage.removeItem('emergencyClosure');
-  updateAdminUI();
-  updateSchedule();
-}
-
-function updateAdminUI(){
-  // Update schedule buttons
-  ['normal','testing','halfday'].forEach(type => {
-    const btn = document.getElementById(`btn-${type}`);
-    btn.classList.toggle('active', scheduleOverride === type);
-  });
-
-  // Update schedule status
-  const scheduleNames = {
-    normal: 'Normal Schedule',
-    testing: 'Testing Schedule',
-    halfday: 'Half Day Schedule'
-  };
-  const statusEl = document.getElementById('scheduleStatus');
-  statusEl.textContent = scheduleNames[scheduleOverride];
-  statusEl.className = scheduleOverride === 'normal' ? 'status-badge status-normal' : 'status-badge status-override';
-
-  // Update emergency status
-  const emergencyBtn = document.getElementById('btn-emergency');
-  const emergencyStatus = document.getElementById('emergencyStatus');
-  emergencyBtn.classList.toggle('active', emergencyClosure);
-  emergencyStatus.textContent = emergencyClosure ? '🚨 EMERGENCY CLOSURE ACTIVE' : 'School Open';
-  emergencyStatus.className = emergencyClosure ? 'status-badge status-override' : 'status-badge status-normal';
-}
-
 /* =========================
    CONFIG
 ========================= */
+let scheduleOverride = 'normal';
+let emergencyClosure = false;
+
 const API_URL =
 "https://script.google.com/macros/s/AKfycbyVu2M6FxsF0RFRT3KSB4g9heI1wWVInLj8BrvYyCWQNSoC1Soho2MTMo6rI36rqTomAA/exec";
 
@@ -514,7 +370,6 @@ async function loadData(){
 setInterval(updateSchedule,1000);
 setInterval(loadData,60000);
 
-updateAdminUI();
 updateSchedule();
 loadData();
 </script>
