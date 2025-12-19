@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>School Schedule Display</title>
+
+<style>
+    body {
+        margin: 0;
+        font-family: Arial, Helvetica, sans-serif;
+        background: #0f172a;
+        color: white;
+    }
+
+    .container {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        grid-template-rows: auto auto 1fr;
+        height: 100vh;
+        gap: 20px;
+        padding: 30px;
+        box-sizing: border-box;
+    }
+
+    .box {
+        background: #1e293b;
+        border-radius: 16px;
+        padding: 25px;
+    }
+
+    h1, h2 {
+        margin: 0 0 15px;
+    }
+
+    /* CURRENT PERIOD */
+    .current-period h1 {
+        font-size: 48px;
+    }
+
+    .countdown {
+        font-size: 64px;
+        font-weight: bold;
+        color: #38bdf8;
+    }
+
+    /* UPCOMING PERIODS */
+    .period-list div {
+        font-size: 22px;
+        margin-bottom: 8px;
+    }
+
+    /* EVENTS */
+    .events div {
+        font-size: 20px;
+        margin-bottom: 10px;
+    }
+
+    /* TEAMS */
+    .teams {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+    }
+
+    .team {
+        background: #020617;
+        border-radius: 12px;
+        padding: 20px;
+        text-align: center;
+        font-size: 28px;
+    }
+
+    .points {
+        font-size: 42px;
+        font-weight: bold;
+        margin-top: 10px;
+        color: #4ade80;
+    }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+    <!-- CURRENT PERIOD -->
+    <div class="box current-period">
+        <h1 id="currentPeriod">No Active Period</h1>
+        <div class="countdown" id="countdown">--:--</div>
+    </div>
+
+    <!-- TEAM POINTS -->
+    <div class="box">
+        <h2>Team Points</h2>
+        <div class="teams">
+            <div class="team">Red Team<div class="points" id="teamRed">120</div></div>
+            <div class="team">Blue Team<div class="points" id="teamBlue">95</div></div>
+            <div class="team">Green Team<div class="points" id="teamGreen">110</div></div>
+            <div class="team">Yellow Team<div class="points" id="teamYellow">80</div></div>
+        </div>
+    </div>
+
+    <!-- UPCOMING PERIODS -->
+    <div class="box">
+        <h2>Upcoming Periods</h2>
+        <div class="period-list" id="upcomingPeriods"></div>
+    </div>
+
+    <!-- EVENTS -->
+    <div class="box">
+        <h2>This Week’s Events</h2>
+        <div class="events" id="events"></div>
+    </div>
+
+</div>
+
+<script>
+/* ======================
+   EDIT THIS SECTION
+====================== */
+
+// Daily schedule
+const periods = [
+    { name: "Period 1", start: "08:00", end: "08:50" },
+    { name: "Period 2", start: "08:55", end: "09:45" },
+    { name: "Period 3", start: "09:50", end: "10:40" },
+    { name: "Lunch", start: "10:40", end: "11:10" },
+    { name: "Period 4", start: "11:15", end: "12:05" },
+    { name: "Period 5", start: "12:10", end: "13:00" }
+];
+
+// Weekly events
+const weeklyEvents = [
+    "Monday: Robotics Club – 3:30 PM",
+    "Tuesday: Basketball Game – 5:00 PM",
+    "Wednesday: Early Release",
+    "Thursday: STEM Night – 6:00 PM",
+    "Friday: Spirit Day 🎉"
+];
+
+/* ======================
+   LOGIC
+====================== */
+
+function timeToDate(time) {
+    const [h, m] = time.split(":");
+    const d = new Date();
+    d.setHours(h, m, 0, 0);
+    return d;
+}
+
+function updateSchedule() {
+    const now = new Date();
+    let current = null;
+    let upcoming = [];
+
+    periods.forEach(p => {
+        const start = timeToDate(p.start);
+        const end = timeToDate(p.end);
+
+        if (now >= start && now < end) {
+            current = { ...p, endTime: end };
+        } else if (start > now) {
+            upcoming.push(p);
+        }
+    });
+
+    // Current Period
+    const currentEl = document.getElementById("currentPeriod");
+    const countdownEl = document.getElementById("countdown");
+
+    if (current) {
+        currentEl.textContent = current.name;
+        const diff = current.endTime - now;
+        const mins = Math.floor(diff / 60000);
+        const secs = Math.floor((diff % 60000) / 1000);
+        countdownEl.textContent = `${mins}:${secs.toString().padStart(2, "0")}`;
+    } else {
+        currentEl.textContent = "No Active Period";
+        countdownEl.textContent = "--:--";
+    }
+
+    // Upcoming Periods
+    const upcomingEl = document.getElementById("upcomingPeriods");
+    upcomingEl.innerHTML = "";
+    upcoming.slice(0, 4).forEach(p => {
+        const div = document.createElement("div");
+        div.textContent = `${p.name} (${p.start} - ${p.end})`;
+        upcomingEl.appendChild(div);
+    });
+}
+
+// Events
+const eventsEl = document.getElementById("events");
+weeklyEvents.forEach(e => {
+    const div = document.createElement("div");
+    div.textContent = e;
+    eventsEl.appendChild(div);
+});
+
+// Update every second
+setInterval(updateSchedule, 1000);
+updateSchedule();
+</script>
+
+</body>
+</html>
