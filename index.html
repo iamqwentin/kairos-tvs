@@ -1,215 +1,213 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
+<meta charset="UTF-8">
 <title>Kairos Academies High School</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-:root {
-    --red:#f15b48;
-    --navy:#12293c;
-    --yellow:#fbaf17;
-    --green:#46b978;
+:root{
+  --red:#f15b48;
+  --navy:#12293c;
+  --yellow:#fbaf17;
+  --green:#46b978;
 }
 
-body {
-    margin:0;
-    font-family:Segoe UI, Arial, sans-serif;
-    background:var(--navy);
-    color:white;
-    overflow:hidden;
+body{
+  margin:0;
+  background:var(--navy);
+  color:white;
+  font-family:Segoe UI, Arial, sans-serif;
+  overflow:hidden;
 }
 
 /* HEADER */
-.header {
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    padding:12px 30px;
-    background:#0b1c2b;
+.header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:10px 26px;
+  background:#0b1c2b;
 }
-.header img { height:55px; }
-.header h1 { font-size:30px; margin:0; }
+.header img{height:50px;}
+.header h1{font-size:26px;margin:0;}
 
 /* ANNOUNCEMENT BAR */
-.marquee {
-    background:var(--red);
-    color:white;
-    padding:10px 0;
-    font-size:22px;
-    white-space:nowrap;
-    overflow:hidden;
+.marquee{
+  background:var(--red);
+  padding:10px 0;
+  font-size:22px;
+  white-space:nowrap;
+  overflow:hidden;
 }
-.marquee span {
-    display:inline-block;
-    padding-left:100%;
-    animation:scroll 25s linear infinite;
+.marquee span{
+  display:inline-block;
+  padding-left:100%;
+  animation:scroll 28s linear infinite;
 }
-@keyframes scroll {
-    from { transform:translateX(0); }
-    to { transform:translateX(-100%); }
+@keyframes scroll{
+  to{transform:translateX(-100%);}
 }
 
 /* MAIN LAYOUT */
-.container {
-    display:grid;
-    grid-template-columns:2fr 1fr;
-    grid-template-rows:1fr 1fr;
-    gap:20px;
-    padding:20px;
-    height:calc(100vh - 150px);
-    box-sizing:border-box;
+.container{
+  display:grid;
+  grid-template-columns:2fr 1fr;
+  grid-template-rows:1fr 1fr;
+  gap:18px;
+  padding:18px;
+  height:calc(100vh - 132px);
+  box-sizing:border-box;
 }
 
-.box {
-    background:#0f2235;
-    border-radius:18px;
-    padding:25px;
+.box{
+  background:#0f2235;
+  border-radius:18px;
+  padding:24px;
 }
 
-.current h2 { font-size:46px; }
-.countdown {
-    font-size:72px;
-    font-weight:bold;
-    color:var(--red);
+/* CURRENT PERIOD */
+.current h2{
+  font-size:46px;
+  margin:0 0 10px;
 }
-
-.upcoming div, .events div {
-    font-size:22px;
-    margin-bottom:8px;
+.countdown{
+  font-size:70px;
+  font-weight:bold;
+  color:var(--red);
 }
 
 /* TEAMS */
-.teams {
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:15px;
+.teams{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:14px;
 }
-.team {
-    background:#071521;
-    border-radius:14px;
-    padding:20px;
-    text-align:center;
-    font-size:26px;
+.team{
+  background:#071521;
+  border-radius:14px;
+  padding:18px;
+  text-align:center;
+  font-size:24px;
 }
-.points {
-    font-size:44px;
-    font-weight:bold;
-}
-
-/* NIGHT MODE */
-.night-overlay {
-    position:fixed;
-    inset:0;
-    background:rgba(0,0,0,0.75);
-    display:none;
-    align-items:center;
-    justify-content:center;
-    z-index:999;
-    text-align:center;
-}
-.night-overlay h1 {
-    font-size:64px;
-    color:var(--yellow);
-}
-</style>
-</head>
-<body>
-
-<div class="header">
-    <img src="https://static.wixstatic.com/media/06d314_445898c503214a03954d33b952b2ec77~mv2.png">
-    <h1>Kairos Academies High School</h1>
-</div>
-
-<div class="marquee">
-    <span id="announcementText">Loading announcements...</span>
-</div>
-
-<div class="container">
-
-    <div class="box current">
-        <h2 id="currentPeriod">No Active Period</h2>
-        <div class="countdown" id="countdown">--:--</div>
-        <h3 style="margin-top:20px;">Upcoming</h3>
-        <div id="upcoming"></div>
-    </div>
-
-    <div class="box">
-        <h2>Team Points</h2>
-        <div class="teams">
-            <div class="team" style="color:#f15b48">Red<div class="points" id="Red">0</div></div>
-            <div class="team" style="color:#25986">Blue<div class="points" id="Blue">0</div></div>
-            <div class="team" style="color:#46b978">Green<div class="points" id="Green">0</div></div>
-            <div class="team" style="color:#fbaf17">Yellow<div class="points" id="Yellow">0</div></div>
-        </div>
-    </div>
-
-    <div class="box">
-        <h2>This Week</h2>
-        <div class="events" id="events"></div>
-    </div>
-
-</div>
-
-<div class="night-overlay" id="nightOverlay">
-    <h1>School is not in session</h1>
-</div>
-
-<script>
-/* GOOGLE SHEET INFO */
-const SHEET_ID = "2PACX-1vTVKjUNvctvyQcxcdCJ_N4XkGKs7yrJUnS2BhpdVvmxuBmK7_8lvHgcp_pDs43H5jUnBhdUO4UIJ_Fd";
-
-/* GOOGLE VIS API */
-function fetchSheet(tab, callback) {
-    const url = `https://docs.google.com/spreadsheets/d/e/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${tab}`;
-    fetch(url)
-        .then(r => r.text())
-        .then(t => {
-            const json = JSON.parse(t.substring(47).slice(0,-2));
-            callback(json.table.rows.map(r => r.c.map(c => c ? c.v : "")));
-        });
-}
-
-/* TEAM POINTS */
-function loadPoints() {
-    fetchSheet("TeamPoints", rows => {
-        rows.forEach(r => {
-            if (document.getElementById(r[0]))
-                document.getElementById(r[0]).textContent = r[1];
-        });
-    });
+.points{
+  font-size:44px;
+  font-weight:bold;
 }
 
 /* EVENTS */
-function loadEvents() {
-    fetchSheet("Events", rows => {
-        const ev = document.getElementById("events");
-        ev.innerHTML = "";
-        let marqueeText = [];
-        rows.forEach(r => {
-            ev.innerHTML += `<div><strong>${r[0]}:</strong> ${r[1]}</div>`;
-            marqueeText.push(`${r[0]}: ${r[1]}`);
-        });
-        document.getElementById("announcementText").textContent = marqueeText.join("   •   ");
-    });
+#events div{
+  font-size:22px;
+  margin-bottom:8px;
 }
 
 /* NIGHT MODE */
-function checkNightMode() {
-    const h = new Date().getHours();
-    document.getElementById("nightOverlay").style.display =
-        (h >= 16 || h < 7) ? "flex" : "none";
+.night{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.75);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:999;
+}
+.night h1{
+  font-size:64px;
+  color:var(--yellow);
+  text-align:center;
+}
+</style>
+</head>
+
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <img src="https://static.wixstatic.com/media/06d314_445898c503214a03954d33b952b2ec77~mv2.png">
+  <h1>Kairos Academies High School</h1>
+</div>
+
+<!-- ANNOUNCEMENTS -->
+<div class="marquee">
+  <span id="marqueeText">Loading announcements...</span>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="container">
+
+  <div class="box current">
+    <h2>Schedule Active</h2>
+    <div class="countdown">Live</div>
+  </div>
+
+  <div class="box">
+    <h2>Team Points</h2>
+    <div class="teams" id="teams"></div>
+  </div>
+
+  <div class="box">
+    <h2>This Week</h2>
+    <div id="events"></div>
+  </div>
+
+</div>
+
+<!-- NIGHT OVERLAY -->
+<div class="night" id="night">
+  <h1>School is not in session</h1>
+</div>
+
+<script>
+/* ✅ APPS SCRIPT API (CONNECTED) */
+const API_URL =
+"https://script.google.com/macros/s/AKfycbyVu2M6FxsF0RFRT3KSB4g9heI1wWVInLj8BrvYyCWQNSoC1Soho2MTMo6rI36rqTomAA/exec";
+
+/* LOAD DATA FROM GOOGLE SHEETS */
+async function loadData(){
+  try{
+    const res = await fetch(API_URL);
+    const data = await res.json();
+
+    /* TEAM POINTS */
+    const teamsDiv = document.getElementById("teams");
+    teamsDiv.innerHTML = "";
+    data.teamPoints.forEach(t=>{
+      teamsDiv.innerHTML += `
+        <div class="team">
+          ${t.team}
+          <div class="points">${t.points}</div>
+        </div>`;
+    });
+
+    /* EVENTS + MARQUEE */
+    const ev = document.getElementById("events");
+    ev.innerHTML = "";
+    let marquee = [];
+    data.events.forEach(e=>{
+      ev.innerHTML += `<div><strong>${e.day}:</strong> ${e.event}</div>`;
+      marquee.push(`${e.day}: ${e.event}`);
+    });
+
+    document.getElementById("marqueeText").textContent =
+      marquee.join("   •   ");
+  } catch(err){
+    console.error("Data load error:", err);
+  }
 }
 
-/* SCHEDULE (unchanged logic, shortened here) */
-setInterval(checkNightMode, 60000);
-setInterval(loadPoints, 60000);
-setInterval(loadEvents, 60000);
+/* AUTO NIGHT MODE */
+function nightMode(){
+  const h = new Date().getHours();
+  document.getElementById("night").style.display =
+    (h >= 16 || h < 7) ? "flex" : "none";
+}
 
-loadPoints();
-loadEvents();
-checkNightMode();
+/* REFRESH LOOPS */
+setInterval(loadData, 60000);
+setInterval(nightMode, 60000);
+
+loadData();
+nightMode();
 </script>
 
 </body>
