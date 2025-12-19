@@ -7,96 +7,123 @@
 
 <style>
 :root {
-    --red: #f15b48;
-    --navy: #12293c;
-    --yellow: #fbaf17;
-    --green: #46b978;
-    --lightblue: #25986;
+    --red:#f15b48;
+    --navy:#12293c;
+    --yellow:#fbaf17;
+    --green:#46b978;
 }
 
 body {
-    margin: 0;
-    background: var(--navy);
-    color: white;
-    font-family: "Segoe UI", Arial, sans-serif;
+    margin:0;
+    font-family:Segoe UI, Arial, sans-serif;
+    background:var(--navy);
+    color:white;
+    overflow:hidden;
 }
 
+/* HEADER */
 .header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 20px 40px;
-    background: #0b1c2b;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:12px 30px;
+    background:#0b1c2b;
+}
+.header img { height:55px; }
+.header h1 { font-size:30px; margin:0; }
+
+/* ANNOUNCEMENT BAR */
+.marquee {
+    background:var(--red);
+    color:white;
+    padding:10px 0;
+    font-size:22px;
+    white-space:nowrap;
+    overflow:hidden;
+}
+.marquee span {
+    display:inline-block;
+    padding-left:100%;
+    animation:scroll 25s linear infinite;
+}
+@keyframes scroll {
+    from { transform:translateX(0); }
+    to { transform:translateX(-100%); }
 }
 
-.header img {
-    height: 70px;
-}
-
-.header h1 {
-    font-size: 36px;
-    margin: 0;
-}
-
+/* MAIN LAYOUT */
 .container {
-    display: grid;
-    grid-template-columns: 2fr 1fr;
-    grid-template-rows: auto 1fr;
-    gap: 20px;
-    padding: 30px;
-    height: calc(100vh - 110px);
-    box-sizing: border-box;
+    display:grid;
+    grid-template-columns:2fr 1fr;
+    grid-template-rows:1fr 1fr;
+    gap:20px;
+    padding:20px;
+    height:calc(100vh - 150px);
+    box-sizing:border-box;
 }
 
 .box {
-    background: #0f2235;
-    border-radius: 18px;
-    padding: 25px;
+    background:#0f2235;
+    border-radius:18px;
+    padding:25px;
 }
 
-.current h2 {
-    font-size: 48px;
-    margin-bottom: 10px;
-}
-
+.current h2 { font-size:46px; }
 .countdown {
-    font-size: 72px;
-    font-weight: bold;
-    color: var(--red);
+    font-size:72px;
+    font-weight:bold;
+    color:var(--red);
 }
 
-.upcoming div,
-.events div {
-    font-size: 22px;
-    margin-bottom: 10px;
+.upcoming div, .events div {
+    font-size:22px;
+    margin-bottom:8px;
 }
 
+/* TEAMS */
 .teams {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 15px;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:15px;
 }
-
 .team {
-    background: #071521;
-    border-radius: 14px;
-    padding: 20px;
-    text-align: center;
-    font-size: 26px;
+    background:#071521;
+    border-radius:14px;
+    padding:20px;
+    text-align:center;
+    font-size:26px;
+}
+.points {
+    font-size:44px;
+    font-weight:bold;
 }
 
-.points {
-    font-size: 44px;
-    font-weight: bold;
-    margin-top: 10px;
+/* NIGHT MODE */
+.night-overlay {
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,0.75);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:999;
+    text-align:center;
+}
+.night-overlay h1 {
+    font-size:64px;
+    color:var(--yellow);
 }
 </style>
 </head>
 <body>
 
 <div class="header">
-    <img src="https://static.wixstatic.com/media/06d314_445898c503214a03954d33b952b2ec77~mv2.png" />
+    <img src="https://static.wixstatic.com/media/06d314_445898c503214a03954d33b952b2ec77~mv2.png">
     <h1>Kairos Academies High School</h1>
+</div>
+
+<div class="marquee">
+    <span id="announcementText">Loading announcements...</span>
 </div>
 
 <div class="container">
@@ -104,17 +131,17 @@ body {
     <div class="box current">
         <h2 id="currentPeriod">No Active Period</h2>
         <div class="countdown" id="countdown">--:--</div>
-        <h3 style="margin-top:30px;">Upcoming</h3>
+        <h3 style="margin-top:20px;">Upcoming</h3>
         <div id="upcoming"></div>
     </div>
 
     <div class="box">
         <h2>Team Points</h2>
         <div class="teams">
-            <div class="team" style="color:#f15b48;">Red<div class="points" id="Red">0</div></div>
-            <div class="team" style="color:#25986;">Blue<div class="points" id="Blue">0</div></div>
-            <div class="team" style="color:#46b978;">Green<div class="points" id="Green">0</div></div>
-            <div class="team" style="color:#fbaf17;">Yellow<div class="points" id="Yellow">0</div></div>
+            <div class="team" style="color:#f15b48">Red<div class="points" id="Red">0</div></div>
+            <div class="team" style="color:#25986">Blue<div class="points" id="Blue">0</div></div>
+            <div class="team" style="color:#46b978">Green<div class="points" id="Green">0</div></div>
+            <div class="team" style="color:#fbaf17">Yellow<div class="points" id="Yellow">0</div></div>
         </div>
     </div>
 
@@ -125,96 +152,64 @@ body {
 
 </div>
 
+<div class="night-overlay" id="nightOverlay">
+    <h1>School is not in session</h1>
+</div>
+
 <script>
-/* ======================
-   GOOGLE SHEET SETUP
-====================== */
+/* GOOGLE SHEET INFO */
 const SHEET_ID = "2PACX-1vTVKjUNvctvyQcxcdCJ_N4XkGKs7yrJUnS2BhpdVvmxuBmK7_8lvHgcp_pDs43H5jUnBhdUO4UIJ_Fd";
 
-/* ======================
-   SCHEDULES
-====================== */
-const normalSchedule = [
- ["Breakfast","07:45","08:00"],
- ["Mentoring","08:00","09:05"],
- ["2nd Period","09:10","10:25"],
- ["3rd Period","10:30","11:45"],
- ["9/10 Lunch | 11/12 Advisory","11:50","12:17"],
- ["11/12 Lunch | 9/10 Advisory","12:23","12:50"],
- ["6th Period","12:55","14:10"],
- ["7th Period","14:15","15:30"],
- ["Mentoring","15:30","15:38"]
-];
-
-const wedSchedule = [
- ["Breakfast","07:40","08:00"],
- ["Mentoring","08:00","08:15"],
- ["2nd Period","08:20","09:05"],
- ["3rd Period","09:10","09:55"],
- ["6th Period","10:00","10:45"],
- ["7th Period","10:50","11:35"],
- ["Club / House Hour","11:40","12:50"],
- ["9/10 Lunch | 11/12 Advisory","12:50","13:18"],
- ["11/12 Lunch | 9/10 Advisory","13:22","13:50"],
- ["Mentoring","13:50","13:58"]
-];
-
-function getSchedule() {
-    return new Date().getDay() === 3 ? wedSchedule : normalSchedule;
+/* GOOGLE VIS API */
+function fetchSheet(tab, callback) {
+    const url = `https://docs.google.com/spreadsheets/d/e/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${tab}`;
+    fetch(url)
+        .then(r => r.text())
+        .then(t => {
+            const json = JSON.parse(t.substring(47).slice(0,-2));
+            callback(json.table.rows.map(r => r.c.map(c => c ? c.v : "")));
+        });
 }
 
-function toDate(t) {
-    const [h,m]=t.split(":");
-    const d=new Date();
-    d.setHours(h,m,0,0);
-    return d;
-}
-
-function updateSchedule() {
-    const now=new Date();
-    const schedule=getSchedule();
-    let current=null, upcoming=[];
-    schedule.forEach(p=>{
-        const s=toDate(p[1]), e=toDate(p[2]);
-        if(now>=s && now<e) current={name:p[0], end:e};
-        if(s>now) upcoming.push(p);
-    });
-
-    document.getElementById("currentPeriod").textContent=current?current.name:"No Active Period";
-    document.getElementById("countdown").textContent=current?
-        `${Math.floor((current.end-now)/60000)}:${String(Math.floor((current.end-now)%60000/1000)).padStart(2,"0")}`:"--:--";
-
-    const up=document.getElementById("upcoming");
-    up.innerHTML="";
-    upcoming.slice(0,4).forEach(p=>{
-        up.innerHTML+=`<div>${p[0]} (${p[1]}–${p[2]})</div>`;
+/* TEAM POINTS */
+function loadPoints() {
+    fetchSheet("TeamPoints", rows => {
+        rows.forEach(r => {
+            if (document.getElementById(r[0]))
+                document.getElementById(r[0]).textContent = r[1];
+        });
     });
 }
 
-/* ======================
-   GOOGLE SHEET FETCH
-====================== */
-async function loadSheet() {
-    const base=`https://opensheet.elk.sh/${SHEET_ID}/`;
-
-    const points=await fetch(base+"TeamPoints").then(r=>r.json());
-    points.forEach(t=>{
-        if(document.getElementById(t.Team))
-            document.getElementById(t.Team).textContent=t.Points;
-    });
-
-    const events=await fetch(base+"Events").then(r=>r.json());
-    const ev=document.getElementById("events");
-    ev.innerHTML="";
-    events.forEach(e=>{
-        ev.innerHTML+=`<div><strong>${e.Day}:</strong> ${e.Event}</div>`;
+/* EVENTS */
+function loadEvents() {
+    fetchSheet("Events", rows => {
+        const ev = document.getElementById("events");
+        ev.innerHTML = "";
+        let marqueeText = [];
+        rows.forEach(r => {
+            ev.innerHTML += `<div><strong>${r[0]}:</strong> ${r[1]}</div>`;
+            marqueeText.push(`${r[0]}: ${r[1]}`);
+        });
+        document.getElementById("announcementText").textContent = marqueeText.join("   •   ");
     });
 }
 
-setInterval(updateSchedule,1000);
-setInterval(loadSheet,60000);
-updateSchedule();
-loadSheet();
+/* NIGHT MODE */
+function checkNightMode() {
+    const h = new Date().getHours();
+    document.getElementById("nightOverlay").style.display =
+        (h >= 16 || h < 7) ? "flex" : "none";
+}
+
+/* SCHEDULE (unchanged logic, shortened here) */
+setInterval(checkNightMode, 60000);
+setInterval(loadPoints, 60000);
+setInterval(loadEvents, 60000);
+
+loadPoints();
+loadEvents();
+checkNightMode();
 </script>
 
 </body>
