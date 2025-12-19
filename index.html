@@ -10,7 +10,6 @@
   --red:#f15b48;
   --navy:#12293c;
   --yellow:#fbaf17;
-  --green:#46b978;
 }
 
 body{
@@ -32,7 +31,7 @@ body{
 .header img{height:50px;}
 .header h1{font-size:26px;margin:0;}
 
-/* ANNOUNCEMENT BAR */
+/* MARQUEE */
 .marquee{
   background:var(--red);
   padding:10px 0;
@@ -45,11 +44,9 @@ body{
   padding-left:100%;
   animation:scroll 28s linear infinite;
 }
-@keyframes scroll{
-  to{transform:translateX(-100%);}
-}
+@keyframes scroll{to{transform:translateX(-100%);}}
 
-/* MAIN LAYOUT */
+/* LAYOUT */
 .container{
   display:grid;
   grid-template-columns:2fr 1fr;
@@ -57,7 +54,6 @@ body{
   gap:18px;
   padding:18px;
   height:calc(100vh - 132px);
-  box-sizing:border-box;
 }
 
 .box{
@@ -67,42 +63,36 @@ body{
 }
 
 /* CURRENT PERIOD */
-.current h2{
-  font-size:46px;
-  margin:0 0 10px;
-}
+.current h2{font-size:44px;margin:0;}
 .countdown{
   font-size:70px;
   font-weight:bold;
   color:var(--red);
 }
+.upcoming div{
+  font-size:22px;
+  margin-top:6px;
+}
 
 /* TEAMS */
-.teams{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:14px;
-}
 .team{
   background:#071521;
   border-radius:14px;
-  padding:18px;
-  text-align:center;
-  font-size:24px;
+  padding:16px;
+  margin-bottom:12px;
+  font-size:22px;
+}
+.rank{
+  font-size:18px;
+  color:var(--yellow);
 }
 .points{
-  font-size:44px;
+  font-size:40px;
   font-weight:bold;
 }
 
-/* EVENTS */
-#events div{
-  font-size:22px;
-  margin-bottom:8px;
-}
-
-/* NIGHT MODE */
-.night{
+/* OVERLAY */
+.overlay{
   position:fixed;
   inset:0;
   background:rgba(0,0,0,.75);
@@ -111,7 +101,7 @@ body{
   justify-content:center;
   z-index:999;
 }
-.night h1{
+.overlay h1{
   font-size:64px;
   color:var(--yellow);
   text-align:center;
@@ -121,30 +111,32 @@ body{
 
 <body>
 
-<!-- HEADER -->
 <div class="header">
   <img src="https://static.wixstatic.com/media/06d314_445898c503214a03954d33b952b2ec77~mv2.png">
   <h1>Kairos Academies High School</h1>
 </div>
 
-<!-- ANNOUNCEMENTS -->
 <div class="marquee">
-  <span id="marqueeText">Loading announcements...</span>
+  <span id="marqueeText">Loading announcements…</span>
 </div>
 
-<!-- MAIN CONTENT -->
 <div class="container">
 
+  <!-- CURRENT PERIOD -->
   <div class="box current">
-    <h2>Schedule Active</h2>
-    <div class="countdown">Live</div>
+    <h2 id="currentPeriod">No Active Period</h2>
+    <div class="countdown" id="countdown">--:--</div>
+    <h3 style="margin-top:16px;">Up Next</h3>
+    <div class="upcoming" id="upcoming"></div>
   </div>
 
+  <!-- TEAM RANKINGS -->
   <div class="box">
-    <h2>Team Points</h2>
-    <div class="teams" id="teams"></div>
+    <h2>Team Rankings</h2>
+    <div id="teams"></div>
   </div>
 
+  <!-- EVENTS -->
   <div class="box">
     <h2>This Week</h2>
     <div id="events"></div>
@@ -152,62 +144,161 @@ body{
 
 </div>
 
-<!-- NIGHT OVERLAY -->
-<div class="night" id="night">
+<div class="overlay" id="closedOverlay">
   <h1>School is not in session</h1>
 </div>
 
 <script>
-/* ✅ APPS SCRIPT API (CONNECTED) */
+/* =========================
+   CONFIG
+========================= */
 const API_URL =
 "https://script.google.com/macros/s/AKfycbyVu2M6FxsF0RFRT3KSB4g9heI1wWVInLj8BrvYyCWQNSoC1Soho2MTMo6rI36rqTomAA/exec";
 
-/* LOAD DATA FROM GOOGLE SHEETS */
-async function loadData(){
-  try{
-    const res = await fetch(API_URL);
-    const data = await res.json();
+const noSchoolRanges = [
+  // Summer / Before School
+  ["2025-07-01", "2025-08-15"],
 
-    /* TEAM POINTS */
-    const teamsDiv = document.getElementById("teams");
-    teamsDiv.innerHTML = "";
-    data.teamPoints.forEach(t=>{
-      teamsDiv.innerHTML += `
+  // Staff Work Days
+  ["2025-07-07", "2025-08-01"],
+
+  // Professional Development
+  ["2025-08-04", "2025-08-15"],
+  ["2025-10-14", "2025-10-17"],
+  ["2026-02-17", "2026-02-20"],
+  ["2026-05-26", "2026-05-29"],
+
+  // Fall / Winter / Spring Breaks
+  ["2025-11-24", "2025-11-28"], // Thanksgiving
+  ["2024-12-22", "2026-01-02"], // Winter Break
+  ["2026-03-16", "2026-03-20"], // Spring Break
+
+  // Single-Day Holidays
+  ["2025-09-01", "2025-09-01"], // Labor Day
+  ["2025-10-13", "2025-10-13"], // Indigenous Peoples' Day
+  ["2025-11-10", "2025-11-10"], // Veterans Day (Observed)
+  ["2026-01-19", "2026-01-19"], // MLK Jr. Day
+  ["2026-02-16", "2026-02-16"], // Presidents Day
+  ["2026-05-25", "2026-05-25"], // Memorial Day
+  ["2026-06-19", "2026-06-19"], // Juneteenth
+];
+
+
+/* SCHEDULES */
+const normalSchedule = [
+ ["Breakfast","07:45","08:00"],
+ ["Mentoring","08:00","09:05"],
+ ["2nd Period","09:10","10:25"],
+ ["3rd Period","10:30","11:45"],
+ ["9/10 Lunch | 11/12 Advisory","11:50","12:17"],
+ ["11/12 Lunch | 9/10 Advisory","12:23","12:50"],
+ ["6th Period","12:55","14:10"],
+ ["7th Period","14:15","15:30"]
+];
+
+const wedSchedule = [
+ ["Breakfast","07:40","08:00"],
+ ["Mentoring","08:00","08:15"],
+ ["2nd Period","08:20","09:05"],
+ ["3rd Period","09:10","09:55"],
+ ["6th Period","10:00","10:45"],
+ ["7th Period","10:50","11:35"],
+ ["Club / House Hour","11:40","12:50"]
+];
+
+/* =========================
+   HELPERS
+========================= */
+function isClosedDay(){
+  const now = new Date();
+  const day = now.getDay();
+  const today = now.toISOString().split("T")[0];
+
+  // Weekends
+  if(day === 0 || day === 6) return true;
+
+  // Date ranges
+  return noSchoolRanges.some(([start, end]) =>
+    today >= start && today <= end
+  );
+}
+
+
+/* =========================
+   SCHEDULE LOGIC
+========================= */
+function updateSchedule(){
+  if(isClosedDay()){
+    document.getElementById("closedOverlay").style.display="flex";
+    return;
+  }
+
+  const now=new Date();
+  const schedule = now.getDay()===3 ? wedSchedule : normalSchedule;
+  let current=null, upcoming=[];
+
+  schedule.forEach(p=>{
+    const s=toDate(p[1]), e=toDate(p[2]);
+    if(now>=s && now<e) current={name:p[0], end:e};
+    if(s>now) upcoming.push(p);
+  });
+
+  document.getElementById("currentPeriod").textContent =
+    current ? current.name : "No Active Period";
+
+  document.getElementById("countdown").textContent =
+    current ? `${Math.floor((current.end-now)/60000)}:${String(Math.floor((current.end-now)%60000/1000)).padStart(2,"0")}` : "--:--";
+
+  const up=document.getElementById("upcoming");
+  up.innerHTML="";
+  upcoming.slice(0,3).forEach(p=>{
+    up.innerHTML+=`<div>${p[0]} (${p[1]}–${p[2]})</div>`;
+  });
+
+  document.getElementById("closedOverlay").style.display="none";
+}
+
+/* =========================
+   DATA LOAD
+========================= */
+async function loadData(){
+  const res = await fetch(API_URL);
+  const data = await res.json();
+
+  /* TEAM RANKINGS */
+  const teamsDiv=document.getElementById("teams");
+  teamsDiv.innerHTML="";
+  data.teamPoints
+    .sort((a,b)=>b.points-a.points)
+    .forEach((t,i)=>{
+      teamsDiv.innerHTML+=`
         <div class="team">
+          <div class="rank">#${i+1}</div>
           ${t.team}
           <div class="points">${t.points}</div>
         </div>`;
     });
 
-    /* EVENTS + MARQUEE */
-    const ev = document.getElementById("events");
-    ev.innerHTML = "";
-    let marquee = [];
-    data.events.forEach(e=>{
-      ev.innerHTML += `<div><strong>${e.day}:</strong> ${e.event}</div>`;
-      marquee.push(`${e.day}: ${e.event}`);
-    });
-
-    document.getElementById("marqueeText").textContent =
-      marquee.join("   •   ");
-  } catch(err){
-    console.error("Data load error:", err);
-  }
+  /* EVENTS + MARQUEE */
+  const ev=document.getElementById("events");
+  ev.innerHTML="";
+  let marquee=[];
+  data.events.forEach(e=>{
+    ev.innerHTML+=`<div><strong>${e.day}:</strong> ${e.event}</div>`;
+    marquee.push(`${e.day}: ${e.event}`);
+  });
+  document.getElementById("marqueeText").textContent =
+    marquee.join("   •   ");
 }
 
-/* AUTO NIGHT MODE */
-function nightMode(){
-  const h = new Date().getHours();
-  document.getElementById("night").style.display =
-    (h >= 16 || h < 7) ? "flex" : "none";
-}
+/* =========================
+   LOOPS
+========================= */
+setInterval(updateSchedule,1000);
+setInterval(loadData,60000);
 
-/* REFRESH LOOPS */
-setInterval(loadData, 60000);
-setInterval(nightMode, 60000);
-
+updateSchedule();
 loadData();
-nightMode();
 </script>
 
 </body>
