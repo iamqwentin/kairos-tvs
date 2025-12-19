@@ -2,113 +2,124 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
+<title>Kairos Academies High School</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>School Schedule Display</title>
 
 <style>
-    body {
-        margin: 0;
-        font-family: Arial, Helvetica, sans-serif;
-        background: #0f172a;
-        color: white;
-    }
+:root {
+    --red: #f15b48;
+    --navy: #12293c;
+    --yellow: #fbaf17;
+    --green: #46b978;
+    --lightblue: #25986;
+}
 
-    .container {
-        display: grid;
-        grid-template-columns: 2fr 1fr;
-        grid-template-rows: auto auto 1fr;
-        height: 100vh;
-        gap: 20px;
-        padding: 30px;
-        box-sizing: border-box;
-    }
+body {
+    margin: 0;
+    background: var(--navy);
+    color: white;
+    font-family: "Segoe UI", Arial, sans-serif;
+}
 
-    .box {
-        background: #1e293b;
-        border-radius: 16px;
-        padding: 25px;
-    }
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 40px;
+    background: #0b1c2b;
+}
 
-    h1, h2 {
-        margin: 0 0 15px;
-    }
+.header img {
+    height: 70px;
+}
 
-    /* CURRENT PERIOD */
-    .current-period h1 {
-        font-size: 48px;
-    }
+.header h1 {
+    font-size: 36px;
+    margin: 0;
+}
 
-    .countdown {
-        font-size: 64px;
-        font-weight: bold;
-        color: #38bdf8;
-    }
+.container {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    grid-template-rows: auto 1fr;
+    gap: 20px;
+    padding: 30px;
+    height: calc(100vh - 110px);
+    box-sizing: border-box;
+}
 
-    /* UPCOMING PERIODS */
-    .period-list div {
-        font-size: 22px;
-        margin-bottom: 8px;
-    }
+.box {
+    background: #0f2235;
+    border-radius: 18px;
+    padding: 25px;
+}
 
-    /* EVENTS */
-    .events div {
-        font-size: 20px;
-        margin-bottom: 10px;
-    }
+.current h2 {
+    font-size: 48px;
+    margin-bottom: 10px;
+}
 
-    /* TEAMS */
-    .teams {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 15px;
-    }
+.countdown {
+    font-size: 72px;
+    font-weight: bold;
+    color: var(--red);
+}
 
-    .team {
-        background: #020617;
-        border-radius: 12px;
-        padding: 20px;
-        text-align: center;
-        font-size: 28px;
-    }
+.upcoming div,
+.events div {
+    font-size: 22px;
+    margin-bottom: 10px;
+}
 
-    .points {
-        font-size: 42px;
-        font-weight: bold;
-        margin-top: 10px;
-        color: #4ade80;
-    }
+.teams {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.team {
+    background: #071521;
+    border-radius: 14px;
+    padding: 20px;
+    text-align: center;
+    font-size: 26px;
+}
+
+.points {
+    font-size: 44px;
+    font-weight: bold;
+    margin-top: 10px;
+}
 </style>
 </head>
 <body>
 
+<div class="header">
+    <img src="https://static.wixstatic.com/media/06d314_445898c503214a03954d33b952b2ec77~mv2.png" />
+    <h1>Kairos Academies High School</h1>
+</div>
+
 <div class="container">
 
-    <!-- CURRENT PERIOD -->
-    <div class="box current-period">
-        <h1 id="currentPeriod">No Active Period</h1>
+    <div class="box current">
+        <h2 id="currentPeriod">No Active Period</h2>
         <div class="countdown" id="countdown">--:--</div>
+        <h3 style="margin-top:30px;">Upcoming</h3>
+        <div id="upcoming"></div>
     </div>
 
-    <!-- TEAM POINTS -->
     <div class="box">
         <h2>Team Points</h2>
         <div class="teams">
-            <div class="team">Red Team<div class="points" id="teamRed">120</div></div>
-            <div class="team">Blue Team<div class="points" id="teamBlue">95</div></div>
-            <div class="team">Green Team<div class="points" id="teamGreen">110</div></div>
-            <div class="team">Yellow Team<div class="points" id="teamYellow">80</div></div>
+            <div class="team" style="color:#f15b48;">Red<div class="points" id="Red">0</div></div>
+            <div class="team" style="color:#25986;">Blue<div class="points" id="Blue">0</div></div>
+            <div class="team" style="color:#46b978;">Green<div class="points" id="Green">0</div></div>
+            <div class="team" style="color:#fbaf17;">Yellow<div class="points" id="Yellow">0</div></div>
         </div>
     </div>
 
-    <!-- UPCOMING PERIODS -->
     <div class="box">
-        <h2>Upcoming Periods</h2>
-        <div class="period-list" id="upcomingPeriods"></div>
-    </div>
-
-    <!-- EVENTS -->
-    <div class="box">
-        <h2>This Week’s Events</h2>
+        <h2>This Week</h2>
         <div class="events" id="events"></div>
     </div>
 
@@ -116,91 +127,94 @@
 
 <script>
 /* ======================
-   EDIT THIS SECTION
+   GOOGLE SHEET SETUP
 ====================== */
-
-// Daily schedule
-const periods = [
-    { name: "Period 1", start: "08:00", end: "08:50" },
-    { name: "Period 2", start: "08:55", end: "09:45" },
-    { name: "Period 3", start: "09:50", end: "10:40" },
-    { name: "Lunch", start: "10:40", end: "11:10" },
-    { name: "Period 4", start: "11:15", end: "12:05" },
-    { name: "Period 5", start: "12:10", end: "13:00" }
-];
-
-// Weekly events
-const weeklyEvents = [
-    "Monday: Robotics Club – 3:30 PM",
-    "Tuesday: Basketball Game – 5:00 PM",
-    "Wednesday: Early Release",
-    "Thursday: STEM Night – 6:00 PM",
-    "Friday: Spirit Day 🎉"
-];
+const SHEET_ID = "2PACX-1vTVKjUNvctvyQcxcdCJ_N4XkGKs7yrJUnS2BhpdVvmxuBmK7_8lvHgcp_pDs43H5jUnBhdUO4UIJ_Fd";
 
 /* ======================
-   LOGIC
+   SCHEDULES
 ====================== */
+const normalSchedule = [
+ ["Breakfast","07:45","08:00"],
+ ["Mentoring","08:00","09:05"],
+ ["2nd Period","09:10","10:25"],
+ ["3rd Period","10:30","11:45"],
+ ["9/10 Lunch | 11/12 Advisory","11:50","12:17"],
+ ["11/12 Lunch | 9/10 Advisory","12:23","12:50"],
+ ["6th Period","12:55","14:10"],
+ ["7th Period","14:15","15:30"],
+ ["Mentoring","15:30","15:38"]
+];
 
-function timeToDate(time) {
-    const [h, m] = time.split(":");
-    const d = new Date();
-    d.setHours(h, m, 0, 0);
+const wedSchedule = [
+ ["Breakfast","07:40","08:00"],
+ ["Mentoring","08:00","08:15"],
+ ["2nd Period","08:20","09:05"],
+ ["3rd Period","09:10","09:55"],
+ ["6th Period","10:00","10:45"],
+ ["7th Period","10:50","11:35"],
+ ["Club / House Hour","11:40","12:50"],
+ ["9/10 Lunch | 11/12 Advisory","12:50","13:18"],
+ ["11/12 Lunch | 9/10 Advisory","13:22","13:50"],
+ ["Mentoring","13:50","13:58"]
+];
+
+function getSchedule() {
+    return new Date().getDay() === 3 ? wedSchedule : normalSchedule;
+}
+
+function toDate(t) {
+    const [h,m]=t.split(":");
+    const d=new Date();
+    d.setHours(h,m,0,0);
     return d;
 }
 
 function updateSchedule() {
-    const now = new Date();
-    let current = null;
-    let upcoming = [];
-
-    periods.forEach(p => {
-        const start = timeToDate(p.start);
-        const end = timeToDate(p.end);
-
-        if (now >= start && now < end) {
-            current = { ...p, endTime: end };
-        } else if (start > now) {
-            upcoming.push(p);
-        }
+    const now=new Date();
+    const schedule=getSchedule();
+    let current=null, upcoming=[];
+    schedule.forEach(p=>{
+        const s=toDate(p[1]), e=toDate(p[2]);
+        if(now>=s && now<e) current={name:p[0], end:e};
+        if(s>now) upcoming.push(p);
     });
 
-    // Current Period
-    const currentEl = document.getElementById("currentPeriod");
-    const countdownEl = document.getElementById("countdown");
+    document.getElementById("currentPeriod").textContent=current?current.name:"No Active Period";
+    document.getElementById("countdown").textContent=current?
+        `${Math.floor((current.end-now)/60000)}:${String(Math.floor((current.end-now)%60000/1000)).padStart(2,"0")}`:"--:--";
 
-    if (current) {
-        currentEl.textContent = current.name;
-        const diff = current.endTime - now;
-        const mins = Math.floor(diff / 60000);
-        const secs = Math.floor((diff % 60000) / 1000);
-        countdownEl.textContent = `${mins}:${secs.toString().padStart(2, "0")}`;
-    } else {
-        currentEl.textContent = "No Active Period";
-        countdownEl.textContent = "--:--";
-    }
-
-    // Upcoming Periods
-    const upcomingEl = document.getElementById("upcomingPeriods");
-    upcomingEl.innerHTML = "";
-    upcoming.slice(0, 4).forEach(p => {
-        const div = document.createElement("div");
-        div.textContent = `${p.name} (${p.start} - ${p.end})`;
-        upcomingEl.appendChild(div);
+    const up=document.getElementById("upcoming");
+    up.innerHTML="";
+    upcoming.slice(0,4).forEach(p=>{
+        up.innerHTML+=`<div>${p[0]} (${p[1]}–${p[2]})</div>`;
     });
 }
 
-// Events
-const eventsEl = document.getElementById("events");
-weeklyEvents.forEach(e => {
-    const div = document.createElement("div");
-    div.textContent = e;
-    eventsEl.appendChild(div);
-});
+/* ======================
+   GOOGLE SHEET FETCH
+====================== */
+async function loadSheet() {
+    const base=`https://opensheet.elk.sh/${SHEET_ID}/`;
 
-// Update every second
-setInterval(updateSchedule, 1000);
+    const points=await fetch(base+"TeamPoints").then(r=>r.json());
+    points.forEach(t=>{
+        if(document.getElementById(t.Team))
+            document.getElementById(t.Team).textContent=t.Points;
+    });
+
+    const events=await fetch(base+"Events").then(r=>r.json());
+    const ev=document.getElementById("events");
+    ev.innerHTML="";
+    events.forEach(e=>{
+        ev.innerHTML+=`<div><strong>${e.Day}:</strong> ${e.Event}</div>`;
+    });
+}
+
+setInterval(updateSchedule,1000);
+setInterval(loadSheet,60000);
 updateSchedule();
+loadSheet();
 </script>
 
 </body>
